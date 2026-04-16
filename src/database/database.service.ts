@@ -1,6 +1,12 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import knex, { Knex } from 'knex';
+import { types } from 'pg';
+
+// Prevent pg from wrapping TIMESTAMP WITHOUT TIME ZONE into a Date object.
+// Without this, pg treats stored local times as UTC, causing a timezone shift
+// when the returned ISO string is displayed in the browser.
+types.setTypeParser(1114, (val: string) => val);
 
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {

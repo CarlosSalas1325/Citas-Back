@@ -15,6 +15,15 @@ export class UsersService {
     return users.map(this.toResponse);
   }
 
+  async findProfessionals(businessId: string) {
+    const users = await this.db.knex<IUser>('users')
+      .where({ business_id: businessId, role: 'PROFESIONAL' })
+      .select('id', 'business_id', 'name', 'role')
+      .orderBy('name', 'asc');
+
+    return users.map((u) => ({ id: u.id, name: u.name, role: u.role }));
+  }
+
   async findById(id: string, businessId: string) {
     const user = await this.db.knex<IUser>('users')
       .where({ id, business_id: businessId })

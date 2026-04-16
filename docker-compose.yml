@@ -23,11 +23,11 @@ services:
       - "3000:3000"
     environment:
       DATABASE_HOST: db
-      DATABASE_PORT: 5432
+      DATABASE_PORT: 5434
       DATABASE_USER: postgres
       DATABASE_PASSWORD: 1234
       DATABASE_NAME: sistema_citas
-      DATABASE_URL: postgresql://postgres:1234@db:5432/sistema_citas
+      DATABASE_URL: postgresql://postgres:1234@db:5434/sistema_citas
       JWT_SECRET: dev-jwt-secret-change-in-production
       JWT_EXPIRES_IN: 15m
       JWT_REFRESH_SECRET: dev-refresh-secret-change-in-production

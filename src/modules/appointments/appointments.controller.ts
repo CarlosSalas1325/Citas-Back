@@ -34,7 +34,7 @@ export class AppointmentsController {
 
   @Get('my')
   @ApiOperation({ summary: 'List my appointments (patient)' })
-  findMy(@CurrentUser('sub') userId: string, @CurrentUser('businessId') businessId: string) {
+  findMy(@CurrentUser('id') userId: string, @CurrentUser('businessId') businessId: string) {
     return this.appointmentsService.findByPatient(businessId, userId);
   }
 

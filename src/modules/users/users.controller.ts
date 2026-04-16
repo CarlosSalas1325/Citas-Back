@@ -29,6 +29,12 @@ export class UsersController {
     return this.usersService.findAll(businessId);
   }
 
+  @Get('professionals')
+  @ApiOperation({ summary: 'List professionals (for booking)' })
+  findProfessionals(@CurrentUser('businessId') businessId: string) {
+    return this.usersService.findProfessionals(businessId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })
   findById(@Param('id') id: string, @CurrentUser('businessId') businessId: string) {

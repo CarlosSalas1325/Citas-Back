@@ -39,15 +39,10 @@ export class AppointmentsService {
   }
 
   async findToday(businessId: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
     const appointments = await this.db
       .knex<IAppointment>('appointments')
       .where({ 'appointments.business_id': businessId })
-      .whereBetween('appointments.date_time', [today.toISOString(), tomorrow.toISOString()])
+      .whereRaw('appointments.date_time::date = CURRENT_DATE')
       .join('users as patient', 'appointments.patient_id', 'patient.id')
       .join('users as professional', 'appointments.professional_id', 'professional.id')
       .join('services', 'appointments.service_id', 'services.id')
@@ -134,17 +129,17 @@ export class AppointmentsService {
       throw new NotFoundException('Servicio no encontrado');
     }
 
-    // Overlap check for the professional
-    const appointmentStart = new Date(dto.dateTime);
-    const appointmentEnd = new Date(appointmentStart.getTime() + service.duration * 60000);
-
+    // Overlap check for the professional — use local time strings, no UTC conversion
     const overlapping = await this.db.knex<IAppointment>('appointments')
       .where({ professional_id: dto.professionalId, business_id: businessId })
       .whereIn('status', [AppointmentStatus.PENDIENTE, AppointmentStatus.CONFIRMADA])
-      .where('date_time', '<', appointmentEnd.toISOString())
       .whereRaw(
-        `date_time + (SELECT duration FROM services WHERE id = appointments.service_id) * interval '1 minute' > ?`,
-        [appointmentStart.toISOString()],
+        `date_time < ?::timestamp + ? * interval '1 minute'`,
+        [dto.dateTime, service.duration],
+      )
+      .whereRaw(
+        `date_time + (SELECT duration FROM services WHERE id = appointments.service_id) * interval '1 minute' > ?::timestamp`,
+        [dto.dateTime],
       )
       .first();
 
@@ -160,7 +155,7 @@ export class AppointmentsService {
         patient_id: dto.patientId,
         professional_id: dto.professionalId,
         service_id: dto.serviceId,
-        date_time: new Date(dto.dateTime),
+        date_time: dto.dateTime as unknown as Date,
         notes: dto.notes || undefined,
         total_price: service.price,
         status: AppointmentStatus.PENDIENTE,
@@ -305,6 +300,15 @@ export class AppointmentsService {
     return { id: appointment.id, status: appointment.status, message: 'Cita cancelada' };
   }
 
+  /** Convert a pg timestamp string '2026-04-09 16:30:00' → '2026-04-09T16:30:00' (no Z) */
+  private normalizeDateTime(dt: string | Date | null | undefined): string {
+    if (!dt) return dt as string;
+    const s = dt instanceof Date
+      ? `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}:00`
+      : String(dt);
+    return s.replace(' ', 'T').substring(0, 19);
+  }
+
   private toResponse(row: any) {
     return {
       id: row.id,
@@ -312,7 +316,7 @@ export class AppointmentsService {
       patientId: row.patient_id,
       professionalId: row.professional_id,
       serviceId: row.service_id,
-      dateTime: row.date_time,
+      dateTime: this.normalizeDateTime(row.date_time),
       status: row.status,
       totalPrice: Number(row.total_price),
       notes: row.notes,
