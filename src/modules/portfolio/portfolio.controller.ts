@@ -36,7 +36,7 @@ export class PortfolioController {
   @ApiOperation({ summary: 'Create portfolio entry' })
   create(
     @CurrentUser('businessId') businessId: string,
-    @CurrentUser('sub') userId: string,
+    @CurrentUser('id') userId: string,
     @Body() dto: CreatePortfolioDto,
   ) {
     return this.portfolioService.create(businessId, userId, dto);
