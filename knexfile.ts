@@ -25,8 +25,11 @@ const config: Record<string, Knex.Config> = {
 
   production: {
     client: 'pg',
-    connection: process.env.DATABASE_URL,
-    pool: { min: 2, max: 10 },
+    connection: {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+    },
+    pool: { min: 0, max: 2 },
     migrations: {
       directory: './migrations',
       extension: 'ts',

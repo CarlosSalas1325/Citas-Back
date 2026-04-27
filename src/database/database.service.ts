@@ -13,16 +13,21 @@ export class DatabaseService implements OnModuleDestroy {
   private readonly knexInstance: Knex;
 
   constructor(private readonly configService: ConfigService) {
+    const isProd = configService.get('NODE_ENV') === 'production';
+    const dbUrl = configService.get<string>('DATABASE_URL');
+
     this.knexInstance = knex({
       client: 'pg',
-      connection: {
-        host: this.configService.get('DATABASE_HOST', 'localhost'),
-        port: this.configService.get<number>('DATABASE_PORT', 5432),
-        user: this.configService.get('DATABASE_USER', 'postgres'),
-        password: this.configService.get('DATABASE_PASSWORD', 'postgres'),
-        database: this.configService.get('DATABASE_NAME', 'sistema_citas'),
-      },
-      pool: { min: 2, max: 10 },
+      connection: isProd && dbUrl
+        ? { connectionString: dbUrl, ssl: { rejectUnauthorized: false } }
+        : {
+            host: this.configService.get('DATABASE_HOST', 'localhost'),
+            port: this.configService.get<number>('DATABASE_PORT', 5432),
+            user: this.configService.get('DATABASE_USER', 'postgres'),
+            password: this.configService.get('DATABASE_PASSWORD', 'postgres'),
+            database: this.configService.get('DATABASE_NAME', 'sistema_citas'),
+          },
+      pool: isProd ? { min: 0, max: 2 } : { min: 2, max: 10 },
     });
   }
 
