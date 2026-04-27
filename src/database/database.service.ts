@@ -19,7 +19,12 @@ export class DatabaseService implements OnModuleDestroy {
     this.knexInstance = knex({
       client: 'pg',
       connection: isProd && dbUrl
-        ? { connectionString: dbUrl, ssl: { rejectUnauthorized: false } }
+        ? {
+            connectionString: dbUrl,
+            ssl: { rejectUnauthorized: false },
+            connectionTimeoutMillis: 8000,
+            statement_timeout: 8000,
+          }
         : {
             host: this.configService.get('DATABASE_HOST', 'localhost'),
             port: this.configService.get<number>('DATABASE_PORT', 5432),
@@ -27,7 +32,7 @@ export class DatabaseService implements OnModuleDestroy {
             password: this.configService.get('DATABASE_PASSWORD', 'postgres'),
             database: this.configService.get('DATABASE_NAME', 'sistema_citas'),
           },
-      pool: isProd ? { min: 0, max: 2 } : { min: 2, max: 10 },
+      pool: isProd ? { min: 0, max: 2, acquireTimeoutMillis: 8000 } : { min: 2, max: 10 },
     });
   }
 
