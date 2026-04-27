@@ -6,7 +6,10 @@
   "private": true,
   "license": "UNLICENSED",
   "pnpm": {
-    "onlyBuiltDependencies": ["@nestjs/core", "@scarf/scarf"]
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@scarf/scarf"
+    ]
   },
   "scripts": {
     "build": "nest build",
@@ -39,6 +42,7 @@
     "cloudinary": "^2.10.0",
     "dotenv": "^17.3.1",
     "knex": "^3.2.8",
+    "multer": "^2.1.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.20.0",
