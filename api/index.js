@@ -8,6 +8,7 @@
 
 require('reflect-metadata');
 
+const path = require('path');
 const serverlessHttp = require('serverless-http');
 
 let handler;
@@ -16,7 +17,7 @@ module.exports = async (req, res) => {
   if (!handler) {
     const { NestFactory } = require('@nestjs/core');
     const { ValidationPipe } = require('@nestjs/common');
-    const { AppModule } = require('../dist/src/app.module');
+    const { AppModule } = require(path.join(__dirname, '..', 'dist', 'src', 'app.module'));
 
     const app = await NestFactory.create(AppModule, {
       logger: ['error', 'warn'],
