@@ -123,7 +123,8 @@ CREATE TABLE IF NOT EXISTS appointment_products (
   id             UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   appointment_id UUID NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
   product_id     UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-  quantity_used  FLOAT NOT NULL DEFAULT 1
+  quantity       FLOAT NOT NULL DEFAULT 1,
+  unit_price     DECIMAL(10,2) NOT NULL DEFAULT 0
 );
 
 

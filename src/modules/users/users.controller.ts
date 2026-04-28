@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Delete,
   Param,
@@ -13,7 +14,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles, CurrentUser } from '../../common/decorators';
 import { Role } from '../../database/types';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/user.dto';
+import { UpdateUserDto, CreateUserDto } from './dto/user.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -21,6 +22,16 @@ import { UpdateUserDto } from './dto/user.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Create a new user in the business (ADMIN only)' })
+  create(
+    @CurrentUser('businessId') businessId: string,
+    @Body() dto: CreateUserDto,
+  ) {
+    return this.usersService.create(businessId, dto);
+  }
 
   @Get()
   @Roles(Role.ADMIN)

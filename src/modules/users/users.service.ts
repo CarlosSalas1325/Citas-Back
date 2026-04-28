@@ -1,10 +1,37 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../../database/database.service';
 import type { IUser } from '../../database/types';
+import { CreateUserDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly db: DatabaseService) {}
+
+  async create(businessId: string, dto: CreateUserDto) {
+    const existing = await this.db.knex<IUser>('users')
+      .where({ business_id: businessId, phone: dto.phone })
+      .first();
+
+    if (existing) {
+      throw new ConflictException('El teléfono ya está registrado en este negocio');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const [user] = await this.db.knex<IUser>('users')
+      .insert({
+        business_id: businessId,
+        name: dto.name,
+        phone: dto.phone,
+        password: hashedPassword,
+        role: dto.role as IUser['role'],
+        is_verified: true,
+      })
+      .returning(['id', 'business_id', 'name', 'phone', 'role', 'is_verified', 'created_at', 'updated_at']);
+
+    return this.toResponse(user);
+  }
 
   async findAll(businessId: string) {
     const users = await this.db.knex<IUser>('users')
