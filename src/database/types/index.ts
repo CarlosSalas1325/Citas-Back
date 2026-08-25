@@ -28,6 +28,8 @@ export interface IBusiness {
   phone: string;
   address: string;
   logo_url?: string;
+  /** Free trial deadline set at signup; past it, access needs an active subscription. */
+  trial_ends_at?: Date | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -36,8 +38,13 @@ export interface IUser {
   id: string;
   business_id: string;
   name: string;
-  phone: string;
-  password: string;
+  // Null only for Google users who have not completed their profile yet (migration 013).
+  phone: string | null;
+  // Null for Google-only accounts — they authenticate through Google, never a password.
+  password: string | null;
+  email?: string | null;
+  google_id?: string | null;
+  avatar_url?: string | null;
   role: Role;
   is_verified: boolean;
   refresh_token?: string | null;

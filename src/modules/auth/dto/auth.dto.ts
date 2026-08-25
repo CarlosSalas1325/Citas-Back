@@ -65,3 +65,31 @@ export class ResendOtpDto {
   @IsNotEmpty()
   phone: string;
 }
+
+export class GoogleLoginDto {
+  @ApiProperty({
+    description: 'ID token issued by Google Identity Services for our client id',
+  })
+  @IsString()
+  @IsNotEmpty()
+  credential: string;
+
+  @ApiProperty({
+    example: 'uuid-of-business',
+    required: false,
+    description:
+      'Business the user is signing into. Omitted from the generic login: the server then ' +
+      'resolves it from the existing accounts, or answers with the list to choose from.',
+  })
+  @IsString()
+  @IsOptional()
+  businessId?: string;
+}
+
+export class CompleteProfileDto {
+  @ApiProperty({ example: '+584121234567' })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(7)
+  phone: string;
+}

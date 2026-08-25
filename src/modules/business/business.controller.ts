@@ -5,12 +5,25 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles, CurrentUser } from '../../common/decorators';
 import { Role } from '../../database/types';
 import { BusinessService } from './business.service';
-import { CreateBusinessDto } from './dto/business.dto';
+import { BusinessSignupService } from './business-signup.service';
+import { CreateBusinessDto, SignupBusinessDto } from './dto/business.dto';
 
 @ApiTags('Businesses')
 @Controller('businesses')
 export class BusinessController {
-  constructor(private readonly businessService: BusinessService) {}
+  constructor(
+    private readonly businessService: BusinessService,
+    private readonly businessSignupService: BusinessSignupService,
+  ) {}
+
+  @Post('signup')
+  @ApiOperation({
+    summary:
+      'Public self-serve signup: creates the business + first admin, starts the free trial, and returns a session',
+  })
+  signup(@Body() dto: SignupBusinessDto) {
+    return this.businessSignupService.signup(dto);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new business with initial admin' })
